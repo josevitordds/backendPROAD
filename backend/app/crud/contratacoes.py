@@ -1,57 +1,51 @@
-# # app/routers/contratacoes.py
-# from fastapi import APIRouter, Depends, HTTPException, status
-# from sqlalchemy.orm import Session
-# from typing import List, Optional
+# app/crud/contratacoes.py
+from sqlalchemy.orm import Session
+from typing import List, Optional
+from ..models import schemas # Importa seus esquemas Pydantic e o modelo ORM
 
-# from ..database import get_db # Importe a dependência do DB
-# from ..models import schemas # Importe seus esquemas (Pydantic e ORM)
-# from ..crud import contratacoes as crud_contratacoes # Importe as funções CRUD que você acabou de criar
-# from .. import security # Importe para usar o decorador @security.get_current_active_user se quiser proteger as rotas
+def get_contratacoes(db: Session, ano: Optional[int] = None) -> List[schemas.ContratacaoORM]:
+    """
+    Recupera uma lista de contratações do banco de dados,
+    opcionalmente filtrada por ano.
+    """
+    query = db.query(schemas.ContratacaoORM)
+    if ano is not None:
+        query = query.filter(schemas.ContratacaoORM.ano_compra == ano)
+    return query.all()
 
-# router = APIRouter(prefix="/contratacoes", tags=["Contratações"])
+def get_contratacao_by_id(db: Session, id_compra: str) -> Optional[schemas.ContratacaoORM]:
+    """
+    Recupera uma única contratação pelo seu id_compra.
+    """
+    return db.query(schemas.ContratacaoORM).filter(schemas.ContratacaoORM.id_compra == id_compra).first()
 
-# # Rota para listar contratações
-# @router.get("/", response_model=List[schemas.Contratacao])
-# # Exemplo de proteção de rota: apenas usuários autenticados podem acessar
-# # @router.get("/", response_model=List[schemas.Contratacao], dependencies=[Depends(security.get_current_active_user)])
-# def read_contratacoes_api(
-#     ano: Optional[int] = None,
-#     db: Session = Depends(get_db) # Injeta a sessão do banco de dados
-# ):
-#     """
-#     Retorna uma lista de contratações, opcionalmente filtradas por ano.
-#     """
-#     contratacoes = crud_contratacoes.get_contratacoes(db, ano=ano)
-#     return contratacoes
+def create_contratacao(db: Session, contratacao: schemas.Contratacao) -> schemas.ContratacaoORM:
+    """
+    Cria uma nova contratação no banco de dados.
+    Recebe um Pydantic BaseModel (schemas.Contratacao) e o converte para o modelo ORM.
+    """
+    db_contratacao = schemas.ContratacaoORM(
+        id_compra=contratacao.id_compra,
+        ano_compra=contratacao.ano_compra,
+        objeto_compra=contratacao.objeto_compra,
+        valor_estimado=contratacao.valor_estimado
+        # Adicione outros campos aqui, se houver, mapeando-os do Pydantic BaseModel para o ORM
+    )
+    db.add(db_contratacao)
+    db.commit() # Salva as alterações no banco de dados
+    db.refresh(db_contratacao) # Atualiza o objeto para obter qualquer valor gerado pelo DB (ex: ID)
+    return db_contratacao
 
-# # Rota para criar uma nova contratação
-# @router.post("/", response_model=schemas.Contratacao, status_code=status.HTTP_201_CREATED)
-# # Exemplo de proteção de rota
-# # @router.post("/", response_model=schemas.Contratacao, status_code=status.HTTP_201_CREATED, dependencies=[Depends(security.get_current_active_user)])
-# def create_contratacao_api(
-#     contratacao: schemas.Contratacao, # Recebe o esquema Pydantic de entrada
-#     db: Session = Depends(get_db)
-# ):
-#     """
-#     Cria uma nova contratação no banco de dados.
-#     """
-#     db_contratacao = crud_contratacoes.get_contratacao_by_id(db, id_compra=contratacao.id_compra)
-#     if db_contratacao:
-#         raise HTTPException(status_code=400, detail="Contratação com este ID já existe.")
-    
-#     return crud_contratacoes.create_contratacao(db=db, contratacao=contratacao)
+def delete_contratacao(db: Session, id_compra: str) -> bool:
+    """
+    Deleta uma contratação do banco de dados pelo id_compra.
+    Retorna True se a contratação foi encontrada e deletada, False caso contrário.
+    """
+    db_contratacao = db.query(schemas.ContratacaoORM).filter(schemas.ContratacaoORM.id_compra == id_compra).first()
+    if db_contratacao:
+        db.delete(db_contratacao)
+        db.commit()
+        return True
+    return False
 
-# # Rota para deletar uma contratação
-# @router.delete("/{id_compra}", status_code=status.HTTP_204_NO_CONTENT)
-# # Exemplo de proteção de rota
-# # @router.delete("/{id_compra}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(security.get_current_active_user)])
-# def delete_contratacao_api(id_compra: str, db: Session = Depends(get_db)):
-#     """
-#     Deleta uma contratação existente pelo ID.
-#     """
-#     success = crud_contratacoes.delete_contratacao(db, id_compra=id_compra)
-#     if not success:
-#         raise HTTPException(status_code=404, detail="Contratação não encontrada.")
-#     return {"message": "Contratação deletada com sucesso."}
-
-# # ... (qualquer outra rota de contratações que você tenha, como PUT/PATCH) ...
+# Adicione outras funções CRUD (update, etc.) aqui conforme necessário.

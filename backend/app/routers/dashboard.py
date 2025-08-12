@@ -1,36 +1,28 @@
-from fastapi import APIRouter
-from app.database import get_connection
+# app/routers/dashboard.py
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session # Importe Session para tipagem
+from typing import Optional
 
-router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
+# Importações relativas para o seu projeto
+from ..database import get_db # Importa a dependência do DB (SQLAlchemy Session)
+from ..models import schemas # Seus esquemas Pydantic e modelos ORM
+from ..crud import dashboard as crud_dashboard # Importa as funções CRUD do dashboard
+from .. import security # Para proteger as rotas com autenticação (opcional)
 
-@router.get("/")
-def dashboard_info():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)  # IMPORTANTE: para receber dicts
+router = APIRouter(prefix="/dashboard", tags=["Dashboard"]) # Prefix adjusted to /dashboard
 
-    # Total de contratações
-    cursor.execute("SELECT COUNT(*) AS total FROM contratacoesPncpUfca")
-    row = cursor.fetchone()
-    total_contratacoes = row["total"] if row and row["total"] is not None else 0
+# Rota para obter dados do dashboard
+@router.get("/", response_model=schemas.DashboardData)
+# Exemplo de proteção de rota: apenas usuários autenticados podem acessar
+# @router.get("/", response_model=schemas.DashboardData, dependencies=[Depends(security.get_current_active_user)])
+def get_dashboard_data_api(
+    db: Session = Depends(get_db) # Injeta a sessão do banco de dados
+):
+    """
+    Retorna os dados sumarizados para o dashboard.
+    """
+    # Usa a função CRUD refatorada que interage com o SQLAlchemy
+    dashboard_data = crud_dashboard.get_dashboard_summary(db)
+    return dashboard_data
 
-    # Total homologado
-    cursor.execute("SELECT SUM(valor_total_homologado) AS total FROM resultadoItensContratacoesPncpUfca")
-    row = cursor.fetchone()
-    total_homologado = float(row["total"]) if row and row["total"] is not None else 0.0
-
-    # Média de economia
-    cursor.execute("""
-        SELECT ROUND(AVG(i.valor_total_estimado - r.valor_total_homologado), 2) AS media
-        FROM itensContratacoesPncpUfca i
-        JOIN resultadoItensContratacoesPncpUfca r ON i.id_compra_item = r.id_compra_item
-    """)
-    row = cursor.fetchone()
-    media_economia = float(row["media"]) if row and row["media"] is not None else 0.0
-
-    conn.close()
-
-    return {
-        "total_contratacoes": total_contratacoes,
-        "total_homologado": total_homologado,
-        "media_economia": media_economia
-    }
+# Adicione outras rotas específicas do dashboard aqui, se necessário.
