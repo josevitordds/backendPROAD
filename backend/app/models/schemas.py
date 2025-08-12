@@ -1,83 +1,69 @@
+# app/models/schemas.py (parte relevante)
 from pydantic import BaseModel
 from typing import Optional
 from decimal import Decimal
 from datetime import date
 
-class Contratacao(BaseModel):
+# Importa a Base do seu arquivo database.py para os modelos SQLAlchemy
+from ..database import Base
+from sqlalchemy import Column, Integer, String, DECIMAL, Date, Boolean
+
+# ----------------------------------------------------------------------
+# Modelos SQLAlchemy para as tabelas do banco de dados
+# ----------------------------------------------------------------------
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(80), unique=True, index=True, nullable=False)
+    email = Column(String(120), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(120), nullable=False)
+
+    def __repr__(self):
+        return f"<User(id={self.id}, username='{self.username}', email='{self.email}')>"
+
+# NOVO: Modelo SQLAlchemy para Contratacao
+class ContratacaoORM(Base): # Renomeado para evitar conflito com Pydantic BaseModel
+    __tablename__ = "contratacoesPncpUfca" # Nome da sua tabela no banco de dados
+
+    id_compra = Column(String(255), primary_key=True, index=True)
+    ano_compra = Column(Integer, nullable=False)
+    objeto_compra = Column(String(1024), nullable=False)
+    valor_estimado = Column(DECIMAL(18, 2), nullable=True) # Exemplo de DECIMAL
+
+    # Adicione outras colunas da sua tabela 'contratacoesPncpUfca' aqui,
+    # caso você precise mapeá-las para interagir com elas via ORM.
+    # Ex:
+    # data_publicacao = Column(Date, nullable=True)
+
+# ----------------------------------------------------------------------
+# Esquemas Pydantic para Autenticação (Input/Output da API)
+# ----------------------------------------------------------------------
+class UserBase(BaseModel):
+    username: str
+    email: str
+
+class UserCreate(UserBase):
+    password: str
+
+class UserResponse(UserBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+# ----------------------------------------------------------------------
+# Seus outros esquemas Pydantic existentes para dados da PROAD
+# ----------------------------------------------------------------------
+class Contratacao(BaseModel): # Este é o Pydantic BaseModel, usado para validar a entrada/saída da API
     id_compra: str
     ano_compra: int
     objeto_compra: str
     valor_estimado: Optional[Decimal]
 
-class ItemContratacao(BaseModel):
-    id_compra_item: str
-    id_compra: str
-    id_contratacao_pncp: Optional[str]
-    codigo_unidade_orgao: Optional[int]
-    cnpj_orgao: Optional[str]
-    numero_item_pncp: Optional[int]
-    numero_item_compra: Optional[int]
-    numero_grupo: Optional[int]
-    descricao_resumida: Optional[str]
-    material_ou_servico: Optional[str]
-    nome_material_ou_servico: Optional[str]
-    codigo_classe: Optional[int]
-    codigo_grupo: Optional[int]
-    codigo_item_catalogo: Optional[int]
-    descricao_detalhada: Optional[str]
-    unidade_medida: Optional[str]
-    orcamento_sigiloso: Optional[bool]
-    item_categoria_id: Optional[int]
-    item_categoria_nome: Optional[str]
-    criterio_julgamento_id: Optional[int]
-    criterio_julgamento_nome: Optional[str]
-    situacao_compra_item: Optional[str]
-    situacao_compra_item_nome: Optional[str]
-    tipo_beneficio: Optional[str]
-    tipo_beneficio_nome: Optional[str]
-    incentivo_produtivo_basico: Optional[bool]
-    quantidade: Optional[Decimal]
-    valor_unitario_estimado: Optional[Decimal]
-    valor_total_estimado: Optional[Decimal]
-    tem_resultado: Optional[bool]
-    codigo_fornecedor: Optional[str]
-    nome_fornecedor: Optional[str]
-    quantidade_resultado: Optional[Decimal]
-    valor_unitario_resultado: Optional[Decimal]
-    valor_total_resultado: Optional[Decimal]
-    data_inclusao: Optional[date]
-    data_atualizacao: Optional[date]
-    data_resultado: Optional[date]
-    margem_preferencia_normal: Optional[bool]
-    percentual_margem_preferencia_normal: Optional[Decimal]
-    margem_preferencia_adicional: Optional[bool]
-    percentual_margem_preferencia_adicional: Optional[Decimal]
-    codigo_ncm: Optional[str]
-    descricao_ncm: Optional[str]
-    numero_controle_pncp_compra: Optional[str]
-
-class ResultadoItensContratacao(BaseModel):
-    id_compra_item: str
-    id_compra: str
-    quantidade_homologada: Optional[int]
-    valor_unitario_homologado: Optional[Decimal]
-    valor_total_homologado: Optional[Decimal]
-
-class Contratos(BaseModel):
-    numero_contrato: str
-    id_compra: str
-
-class ItensContratos(BaseModel):
-    id_compra: str
-
-class SemLicitacao(BaseModel):
-    id_compra: str
-
-class ItensSemLicitacao(BaseModel):
-    id_compra: str
-
-class Licitacao(BaseModel):
-    id_compra: str
-
-class ItensLicitacao(BaseModel):
-    id_compra: str
+# ... (todos os seus outros esquemas Pydantic como ItemContratacao, ResultadoItensContratacao, etc.) ...
+# Certifique-se de que todos os Pydantic BaseModels para suas tabelas
+# estejam aqui, e que se precisar de modelos ORM para eles,
+# você os defina como ContratacaoORM acima.

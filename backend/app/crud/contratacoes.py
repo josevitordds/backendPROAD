@@ -1,42 +1,57 @@
-from app.database import get_connection
+# # app/routers/contratacoes.py
+# from fastapi import APIRouter, Depends, HTTPException, status
+# from sqlalchemy.orm import Session
+# from typing import List, Optional
 
-# 🔍 READ (com filtro opcional por ano)
-def get_contratacoes(ano: int = None):
-    query = "SELECT id_compra, ano_compra, objeto_compra, valor_estimado FROM contratacoesPncpUfca"
-    params = []
-    if ano is not None:
-        query += " WHERE ano_compra = %s"
-        params.append(ano)
+# from ..database import get_db # Importe a dependência do DB
+# from ..models import schemas # Importe seus esquemas (Pydantic e ORM)
+# from ..crud import contratacoes as crud_contratacoes # Importe as funções CRUD que você acabou de criar
+# from .. import security # Importe para usar o decorador @security.get_current_active_user se quiser proteger as rotas
 
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(query, tuple(params))
-    result = cursor.fetchall()
-    conn.close()
+# router = APIRouter(prefix="/contratacoes", tags=["Contratações"])
 
-    return result
+# # Rota para listar contratações
+# @router.get("/", response_model=List[schemas.Contratacao])
+# # Exemplo de proteção de rota: apenas usuários autenticados podem acessar
+# # @router.get("/", response_model=List[schemas.Contratacao], dependencies=[Depends(security.get_current_active_user)])
+# def read_contratacoes_api(
+#     ano: Optional[int] = None,
+#     db: Session = Depends(get_db) # Injeta a sessão do banco de dados
+# ):
+#     """
+#     Retorna uma lista de contratações, opcionalmente filtradas por ano.
+#     """
+#     contratacoes = crud_contratacoes.get_contratacoes(db, ano=ano)
+#     return contratacoes
 
+# # Rota para criar uma nova contratação
+# @router.post("/", response_model=schemas.Contratacao, status_code=status.HTTP_201_CREATED)
+# # Exemplo de proteção de rota
+# # @router.post("/", response_model=schemas.Contratacao, status_code=status.HTTP_201_CREATED, dependencies=[Depends(security.get_current_active_user)])
+# def create_contratacao_api(
+#     contratacao: schemas.Contratacao, # Recebe o esquema Pydantic de entrada
+#     db: Session = Depends(get_db)
+# ):
+#     """
+#     Cria uma nova contratação no banco de dados.
+#     """
+#     db_contratacao = crud_contratacoes.get_contratacao_by_id(db, id_compra=contratacao.id_compra)
+#     if db_contratacao:
+#         raise HTTPException(status_code=400, detail="Contratação com este ID já existe.")
+    
+#     return crud_contratacoes.create_contratacao(db=db, contratacao=contratacao)
 
-# ➕ CREATE (adicionar nova contratação)
-def add_contratacao(id_compra: str, ano_compra: int, objeto_compra: str, valor_estimado: float):
-    query = """
-        INSERT INTO contratacoesPncpUfca (id_compra, ano_compra, objeto_compra, valor_estimado)
-        VALUES (%s, %s, %s, %s)
-    """
+# # Rota para deletar uma contratação
+# @router.delete("/{id_compra}", status_code=status.HTTP_204_NO_CONTENT)
+# # Exemplo de proteção de rota
+# # @router.delete("/{id_compra}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(security.get_current_active_user)])
+# def delete_contratacao_api(id_compra: str, db: Session = Depends(get_db)):
+#     """
+#     Deleta uma contratação existente pelo ID.
+#     """
+#     success = crud_contratacoes.delete_contratacao(db, id_compra=id_compra)
+#     if not success:
+#         raise HTTPException(status_code=404, detail="Contratação não encontrada.")
+#     return {"message": "Contratação deletada com sucesso."}
 
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(query, (id_compra, ano_compra, objeto_compra, valor_estimado))
-    conn.commit()
-    conn.close()
-
-
-# ❌ DELETE (remover contratação por ID)
-def delete_contratacao(id_compra: str):
-    query = "DELETE FROM contratacoesPncpUfca WHERE id_compra = %s"
-
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(query, (id_compra,))
-    conn.commit()
-    conn.close()
+# # ... (qualquer outra rota de contratações que você tenha, como PUT/PATCH) ...

@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Importação das rotas
+
+from app.database import Base, engine
+
 from app.routers import (
     contratacoes,
     dashboard,
@@ -13,21 +15,22 @@ from app.routers import (
     itenssemlicitacao,
     licitacao,
     itenslicitacao,
+    auth, 
 )
 
-# Instância da aplicação
+
+Base.metadata.create_all(bind=engine)
 app = FastAPI(title="API Compras UFCA")
 
-# Configuração de CORS (libera acesso de qualquer origem)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Em produção, troque por ["https://seusite.com"]
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Registro das rotas
 app.include_router(contratacoes.router)
 app.include_router(dashboard.router)
 app.include_router(itenscontratacoes.router)
@@ -38,3 +41,4 @@ app.include_router(semlicitacao.router)
 app.include_router(itenssemlicitacao.router)
 app.include_router(licitacao.router)
 app.include_router(itenslicitacao.router)
+app.include_router(auth.router)  
