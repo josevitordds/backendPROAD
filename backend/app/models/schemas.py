@@ -1,22 +1,12 @@
-# app/models/schemas.py
 from pydantic import BaseModel
 from typing import Optional
 from decimal import Decimal
 from datetime import date
 
-# Importa a Base do seu arquivo database.py para os modelos SQLAlchemy
 from ..database import Base
-# Importa tipos de coluna do SQLAlchemy e 'func' para funções de agregação
 from sqlalchemy import Column, Integer, String, DECIMAL, Date, Boolean, func
 
-# ----------------------------------------------------------------------
-# Modelos SQLAlchemy para as tabelas do banco de dados (ORM)
-# ----------------------------------------------------------------------
 class User(Base):
-    """
-    Modelo SQLAlchemy para a tabela 'users' no banco de dados.
-    Define a estrutura dos usuários que serão armazenados.
-    """
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(80), unique=True, index=True, nullable=False)
@@ -27,10 +17,6 @@ class User(Base):
         return f"<User(id={self.id}, username='{self.username}', email='{self.email}')>"
 
 class ContratacaoORM(Base):
-    """
-    Modelo SQLAlchemy para a tabela 'contratacoesPncpUfca' no banco de dados.
-    Mapeia as colunas da tabela para atributos Python.
-    """
     __tablename__ = "contratacoesPncpUfca"
     id_compra = Column(String(255), primary_key=True, index=True)
     ano_compra = Column(Integer, nullable=False)
@@ -38,9 +24,6 @@ class ContratacaoORM(Base):
     valor_estimado = Column(DECIMAL(18, 2), nullable=True)
 
 class ContratosORM(Base):
-    """
-    Modelo SQLAlchemy para a tabela 'contratosPncpDetalhado' no banco de dados.
-    """
     __tablename__ = "contratosPncpDetalhado"
     numero_contrato = Column(String(255), primary_key=True, index=True)
     id_compra = Column(String(255), nullable=False)
@@ -50,9 +33,6 @@ class ContratosORM(Base):
         return f"<Contrato(numero_contrato='{self.numero_contrato}', id_compra='{self.id_compra}')>"
 
 class ItensContratacoesORM(Base):
-    """
-    Modelo SQLAlchemy para a tabela 'itensContratacoesPncpUfca' no banco de dados.
-    """
     __tablename__ = "itensContratacoesPncpUfca"
     id_item = Column(String(255), primary_key=True, index=True)
     id_compra = Column(String(255), nullable=False)
@@ -66,9 +46,6 @@ class ItensContratacoesORM(Base):
         return f"<ItemContratacao(id_item='{self.id_item}', descricao_item='{self.descricao_item}')>"
 
 class ItensContratoORM(Base):
-    """
-    Modelo SQLAlchemy para a tabela 'itensContratoPncpUfca' no banco de dados.
-    """
     __tablename__ = "itensContratoPncpUfca"
     id_compra = Column(String(255), primary_key=True, index=True)
     ano_compra = Column(Integer, nullable=True)
@@ -76,10 +53,15 @@ class ItensContratoORM(Base):
     def __repr__(self):
         return f"<ItemContrato(id_compra='{self.id_compra}', ano_compra={self.ano_compra})>"
 
+class LicitacaoORM(Base):
+    __tablename__ = "licitacoesUfca"
+    id_compra = Column(String(255), primary_key=True, index=True)
+    ano_compra = Column(Integer, nullable=True)
+
+    def __repr__(self):
+        return f"<Licitacao(id_compra='{self.id_compra}', ano_compra={self.ano_compra})>"
+
 class ItensLicitacaoORM(Base):
-    """
-    Modelo SQLAlchemy para a tabela 'itensLicitacoesUfca' no banco de dados.
-    """
     __tablename__ = "itensLicitacoesUfca"
     id_compra = Column(String(255), primary_key=True, index=True)
     ano_compra = Column(Integer, nullable=True)
@@ -88,9 +70,6 @@ class ItensLicitacaoORM(Base):
         return f"<ItemLicitacao(id_compra='{self.id_compra}', ano_compra={self.ano_compra})>"
 
 class SemLicitacaoORM(Base):
-    """
-    Modelo SQLAlchemy para a tabela 'compraSemLicitacaoPncp' no banco de dados.
-    """
     __tablename__ = "compraSemLicitacaoPncp"
     id_compra = Column(String(255), primary_key=True, index=True)
     ano_compra = Column(Integer, nullable=True)
@@ -98,23 +77,16 @@ class SemLicitacaoORM(Base):
     def __repr__(self):
         return f"<SemLicitacao(id_compra='{self.id_compra}', ano_compra={self.ano_compra})>"
 
-class ItensSemLicitacaoORM(Base): # <--- ESTA É A CLASSE QUE ESTAVA FALTANDO OU COM PROBLEMA
-    """
-    Modelo SQLAlchemy para a tabela 'itensCompraSemLicitacaoPncp' no banco de dados.
-    Mapeia as colunas da tabela para atributos Python.
-    """
+class ItensSemLicitacaoORM(Base):
     __tablename__ = "itensCompraSemLicitacaoPncp"
-    id_compra = Column(String(255), primary_key=True, index=True) # Assumindo id_compra como PK
-    ano_compra = Column(Integer, nullable=True) # Ajuste a nulidade conforme seu DB
+    id_compra = Column(String(255), primary_key=True, index=True)
+    ano_compra = Column(Integer, nullable=True)
 
     def __repr__(self):
         return f"<ItemSemLicitacao(id_compra='{self.id_compra}', ano_compra={self.ano_compra})>"
 
 
 class ResultadoItensContratacoesORM(Base):
-    """
-    Modelo SQLAlchemy para a tabela 'resultadoItensContratacoesPncpUfca' no banco de dados.
-    """
     __tablename__ = "resultadoItensContratacoesPncpUfca"
     id_compra_item = Column(String(255), primary_key=True, index=True)
     id_compra = Column(String(255), nullable=False)
@@ -126,9 +98,7 @@ class ResultadoItensContratacoesORM(Base):
     def __repr__(self):
         return f"<ResultadoItemContratacao(id_compra_item='{self.id_compra_item}', id_compra='{self.id_compra}')>"
 
-# ----------------------------------------------------------------------
-# Esquemas Pydantic para Autenticação (Input/Output da API)
-# ----------------------------------------------------------------------
+
 class UserBase(BaseModel):
     username: str
     email: str
@@ -144,13 +114,11 @@ class UserResponse(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    username: str
 
 class TokenData(BaseModel):
     email: Optional[str] = None
 
-# ----------------------------------------------------------------------
-# Seus outros esquemas Pydantic existentes para dados da PROAD
-# ----------------------------------------------------------------------
 class Contratacao(BaseModel):
     id_compra: str
     ano_compra: int
