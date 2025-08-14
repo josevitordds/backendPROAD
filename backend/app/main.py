@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from .routers import viewPncp
 
 from .database import Base, engine
 from .routers import (
@@ -40,3 +41,4 @@ app.include_router(itenssemlicitacao.router)
 app.include_router(licitacao.router)
 app.include_router(itenslicitacao.router)
 app.include_router(auth.router)  
+app.include_router(viewPncp.router)

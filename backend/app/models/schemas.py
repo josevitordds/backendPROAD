@@ -40,7 +40,7 @@ class ItensContratacoesORM(Base):
     descricao_item = Column(String(1024), nullable=True)
     quantidade_item = Column(DECIMAL(18, 2), nullable=True)
     valor_unitario_estimado = Column(DECIMAL(18, 2), nullable=True)
-    valor_total_estimado = Column(DECIMAL(18, 2), nullable=True)
+    valor_total_estimado = Column(DECIMAL(18, 2), nullable=True) 
 
     def __repr__(self):
         return f"<ItemContratacao(id_item='{self.id_item}', descricao_item='{self.descricao_item}')>"
@@ -79,8 +79,8 @@ class SemLicitacaoORM(Base):
 
 class ItensSemLicitacaoORM(Base):
     __tablename__ = "itensCompraSemLicitacaoPncp"
-    id_compra = Column(String(255), primary_key=True, index=True)
-    ano_compra = Column(Integer, nullable=True)
+    id_compra = Column(String(255), primary_key=True, index=True) 
+    ano_compra = Column(Integer, nullable=True) 
 
     def __repr__(self):
         return f"<ItemSemLicitacao(id_compra='{self.id_compra}', ano_compra={self.ano_compra})>"
@@ -98,6 +98,42 @@ class ResultadoItensContratacoesORM(Base):
     def __repr__(self):
         return f"<ResultadoItemContratacao(id_compra_item='{self.id_compra_item}', id_compra='{self.id_compra}')>"
 
+class MinhaViewORM(Base):
+    __tablename__ = "vw_pncpUFCApainel" 
+    __table_args__ = {'extend_existing': True} 
+
+    
+    id_compra = Column(String(50), primary_key=True, index=True)
+    processo = Column(String(100),  nullable=True)
+    modalidade_nome = Column(String(100),  nullable=True)
+    numero_compra = Column(String(50), nullable=True)
+    objeto_compra = Column(String(5000), nullable=True)
+    descricao_resumida = Column(String(5000), nullable=True)
+    unidade_medida = Column(String(50), nullable=True)
+    quantidade_resultado = Column(DECIMAL(15,2), nullable=True)
+    quantidade_ufca = Column(DECIMAL(15,2), nullable=True)
+    valor_total_resultado = Column(DECIMAL(15,2), nullable=True)
+    valor_unitario_estimado = Column(DECIMAL(15,2), nullable=True)
+    valor_unitario_resultado = Column(DECIMAL(15,2), nullable=True)
+    valor_planejamento = Column(DECIMAL(15,2), nullable=True)
+    valor_total_homologado = Column(DECIMAL(15,2), nullable=True)
+    nome_fornecedor = Column(String(255), nullable=True)
+    numero_item_compra = Column(Integer, nullable=True)
+    ni_fornecedor = Column(String(50), nullable=True)
+    objeto_resumido = Column(String(5000), nullable=True)
+    objeto_TR = Column(String(5000), nullable=True)
+    demandante = Column(String(255), nullable=True)
+    situacao_compra_item_nome = Column(String(50), nullable=True)
+    nome_material_ou_servico = Column(String(50), nullable=True)
+    ano_compra = Column(Integer, nullable=True)
+    valor_estimado = Column(DECIMAL(15,2), nullable=True)
+    valor_homologado = Column(DECIMAL(15,2), nullable=True)
+    descricao_detalhada = Column(String(5000), nullable=True)
+    
+    
+
+    def __repr__(self):
+        return f"<viewPncp(id='{self.id_compra}', ano={self.ano_compra})>"
 
 class UserBase(BaseModel):
     username: str
@@ -106,8 +142,10 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-class UserResponse(UserBase):
+class UserResponse(BaseModel): 
     id: int
+    username: str
+    email: str
     class Config:
         from_attributes = True
 
@@ -244,6 +282,13 @@ class DashboardData(BaseModel):
     total_contratacoes: int
     total_homologado: Decimal
     media_economia: Decimal
+
+    class Config:
+        from_attributes = True
+
+class MinhaViewResponse(BaseModel):
+    id_compra: str
+    ano_compra: int
 
     class Config:
         from_attributes = True

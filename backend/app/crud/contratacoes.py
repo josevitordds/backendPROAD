@@ -17,7 +17,6 @@ def create_contratacao(db: Session, contratacao: schemas.Contratacao) -> schemas
         ano_compra=contratacao.ano_compra,
         objeto_compra=contratacao.objeto_compra,
         valor_estimado=contratacao.valor_estimado
-        # Adicione outros campos aqui
     )
     db.add(db_contratacao)
     db.commit() 
