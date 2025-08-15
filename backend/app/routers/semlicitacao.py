@@ -31,9 +31,6 @@ def create_sem_licitacao_api(
 
 @router.delete("/{id_compra}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_sem_licitacao_api(id_compra: str, db: Session = Depends(get_db)):
-    """
-    Deleta uma compra sem licitação existente pelo ID de compra.
-    """
     success = crud_sem_licitacao.delete_sem_licitacao(db, id_compra=id_compra)
     if not success:
         raise HTTPException(status_code=404, detail="Compra sem licitação não encontrada.")

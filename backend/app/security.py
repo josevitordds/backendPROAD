@@ -60,12 +60,4 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     return user
 
 async def get_current_active_user(current_user: schemas.User = Depends(get_current_user)):
-    """
-    Dependência que verifica se o usuário retornado por get_current_user está 'ativo'.
-    Você pode adicionar lógica aqui para verificar o status 'is_active' do usuário,
-    se o seu modelo User tiver esse campo.
-    """
-    # Exemplo: Se o seu modelo User tivesse um campo 'is_active'
-    # if not current_user.is_active:
-    #     raise HTTPException(status_code=400, detail="Usuário inativo")
     return current_user

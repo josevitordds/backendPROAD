@@ -288,7 +288,35 @@ class DashboardData(BaseModel):
 
 class MinhaViewResponse(BaseModel):
     id_compra: str
-    ano_compra: int
+    processo: str | None = None
+    modalidade_nome: str | None = None
+    numero_compra: str | None = None
+    objeto_compra: str | None = None
+    descricao_resumida: str | None = None
+    unidade_medida: str | None = None
+    quantidade_resultado: Decimal | None = None
+    quantidade_ufca: Decimal | None = None
+    valor_total_resultado: Decimal | None = None
+    valor_unitario_estimado: Decimal | None = None
+    valor_unitario_resultado: Decimal | None = None
+    valor_planejamento: Decimal | None = None
+    valor_total_homologado: Decimal | None = None
+    nome_fornecedor: str | None = None
+    numero_item_compra: int | None = None
+    cnpj_fornecedor: str | None = None
+    codigo_fornecedor: str | None = None
+    ni_fornecedor: str | None = None
+    objeto_resumido: str | None = None
+    objeto_TR: str | None = None
+    demandante: str | None = None
+    situacao_compra_item_nome: str | None = None
+    nome_material_ou_servico: str | None = None
+    ano_compra: int | None = None
+    valor_estimado: Decimal | None = None
+
+    valor_homologado: Decimal | None = None
+    descricao_detalhada: str | None = None
 
     class Config:
         from_attributes = True
+

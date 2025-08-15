@@ -1,13 +1,12 @@
-# app/routers/itenssemlicitacao.py
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session # Importe Session para tipagem
+from sqlalchemy.orm import Session 
 from typing import List, Optional
 
-# Importações relativas para o seu projeto
-from ..database import get_db # Importa a dependência do DB (SQLAlchemy Session)
-from ..models import schemas # Seus esquemas Pydantic e modelos ORM
-from ..crud import itenssemlicitacao as crud_itens_sem_licitacao # Importa as funções CRUD refatoradas
-from .. import security # Para proteger as rotas com autenticação (opcional)
+
+from ..database import get_db  
+from ..models import schemas 
+from ..crud import itenssemlicitacao as crud_itens_sem_licitacao 
+from .. import security 
 
 router = APIRouter(prefix="/itenssemlicitacao", tags=["Itens Sem Licitação"])
 
