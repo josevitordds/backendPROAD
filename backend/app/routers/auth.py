@@ -16,7 +16,7 @@ def register_user(user: models.schemas.UserCreate, db: Session = Depends(get_db)
     if db_user_email:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Email já cadastrado"
+            detalhes="Email já cadastrado"
         )
     
     db_user_username = crud_auth.get_user_by_username(db, username=user.username)
@@ -35,7 +35,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     if not user or not security.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciais inválidas",
+            detail="Email ou Senha inválidas",
             headers={"WWW-Authenticate": "Bearer"},
         )
     

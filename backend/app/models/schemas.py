@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from decimal import Decimal
 from datetime import date
 
@@ -34,16 +34,56 @@ class ContratosORM(Base):
 
 class ItensContratacoesORM(Base):
     __tablename__ = "itensContratacoesPncpUfca"
-    id_item = Column(String(255), primary_key=True, index=True)
-    id_compra = Column(String(255), nullable=False)
-    ano_compra = Column(Integer, nullable=False)
-    descricao_item = Column(String(1024), nullable=True)
-    quantidade_item = Column(DECIMAL(18, 2), nullable=True)
-    valor_unitario_estimado = Column(DECIMAL(18, 2), nullable=True)
-    valor_total_estimado = Column(DECIMAL(18, 2), nullable=True) 
+    
+    id_compra_item = Column(String(50), primary_key=True, index=True)
+    id_compra = Column(String(50), nullable=False)
+    id_contratacao_pncp = Column(String(50))
+    codigo_unidade_orgao = Column(Integer)
+    cnpj_orgao = Column(String(20))
+    numero_item_pncp = Column(Integer)
+    numero_item_compra = Column(Integer)
+    numero_grupo = Column(Integer)
+    descricao_resumida = Column(String) 
+    material_ou_servico = Column(String(1))
+    nome_material_ou_servico = Column(String(100))
+    codigo_classe = Column(Integer)
+    codigo_grupo = Column(Integer)
+    codigo_item_catalogo = Column(Integer)
+    descricao_detalhada = Column(String) 
+    unidade_medida = Column(String(50))
+    orcamento_sigiloso = Column(Boolean)
+    item_categoria_id = Column(Integer)
+    item_categoria_nome = Column(String(100))
+    criterio_julgamento_id = Column(Integer)
+    criterio_julgamento_nome = Column(String(100))
+    situacao_compra_item = Column(String(50))
+    situacao_compra_item_nome = Column(String(100))
+    tipo_beneficio = Column(String(50))
+    tipo_beneficio_nome = Column(String(100))
+    incentivo_produtivo_basico = Column(Boolean)
+    quantidade = Column(DECIMAL(15, 2))
+    valor_unitario_estimado = Column(DECIMAL(15, 2))
+    valor_total_estimado = Column(DECIMAL(15, 2)) 
+    tem_resultado = Column(Boolean)
+    codigo_fornecedor = Column(String(50))
+    nome_fornecedor = Column(String(255))
+    quantidade_resultado = Column(DECIMAL(15, 2))
+    valor_unitario_resultado = Column(DECIMAL(15, 2))
+    valor_total_resultado = Column(DECIMAL(15, 2))
+    data_inclusao = Column(Date)
+    data_atualizacao = Column(Date)
+    data_resultado = Column(Date)
+    margem_preferencia_normal = Column(Boolean)
+    percentual_margem_preferencia_normal = Column(DECIMAL(5, 2))
+    margem_preferencia_adicional = Column(Boolean)
+    percentual_margem_preferencia_adicional = Column(DECIMAL(5, 2))
+    codigo_ncm = Column(String(20))
+    descricao_ncm = Column(String)
+    numero_controle_pncp_compra = Column(String(50))
+    quantidade_ufca = Column(DECIMAL(15, 2))
 
     def __repr__(self):
-        return f"<ItemContratacao(id_item='{self.id_item}', descricao_item='{self.descricao_item}')>"
+        return f"<ItemContratacao(id_compra_item='{self.id_compra_item}', id_compra='{self.id_compra}')>"
 
 class ItensContratoORM(Base):
     __tablename__ = "itensContratoPncpUfca"
@@ -98,12 +138,13 @@ class ResultadoItensContratacoesORM(Base):
     def __repr__(self):
         return f"<ResultadoItemContratacao(id_compra_item='{self.id_compra_item}', id_compra='{self.id_compra}')>"
 
+
 class MinhaViewORM(Base):
     __tablename__ = "vw_pncpUFCApainel" 
     __table_args__ = {'extend_existing': True} 
 
-    
-    id_compra = Column(String(50), primary_key=True, index=True)
+    id_compra = Column(String(50), primary_key=True)
+    numero_item_compra = Column(Integer, primary_key=True)
     processo = Column(String(100),  nullable=True)
     modalidade_nome = Column(String(100),  nullable=True)
     numero_compra = Column(String(50), nullable=True)
@@ -118,7 +159,8 @@ class MinhaViewORM(Base):
     valor_planejamento = Column(DECIMAL(15,2), nullable=True)
     valor_total_homologado = Column(DECIMAL(15,2), nullable=True)
     nome_fornecedor = Column(String(255), nullable=True)
-    numero_item_compra = Column(Integer, nullable=True)
+    cnpj_fornecedor = Column(String(50), nullable=True)
+    codigo_fornecedor = Column(String(50), nullable=True)
     ni_fornecedor = Column(String(50), nullable=True)
     objeto_resumido = Column(String(5000), nullable=True)
     objeto_TR = Column(String(5000), nullable=True)
@@ -129,11 +171,9 @@ class MinhaViewORM(Base):
     valor_estimado = Column(DECIMAL(15,2), nullable=True)
     valor_homologado = Column(DECIMAL(15,2), nullable=True)
     descricao_detalhada = Column(String(5000), nullable=True)
-    
-    
 
     def __repr__(self):
-        return f"<viewPncp(id='{self.id_compra}', ano={self.ano_compra})>"
+        return f"<viewPncp(id='{self.id_compra}', item={self.numero_item_compra})>"
 
 class UserBase(BaseModel):
     username: str
@@ -288,35 +328,65 @@ class DashboardData(BaseModel):
 
 class MinhaViewResponse(BaseModel):
     id_compra: str
-    processo: str | None = None
-    modalidade_nome: str | None = None
-    numero_compra: str | None = None
-    objeto_compra: str | None = None
-    descricao_resumida: str | None = None
-    unidade_medida: str | None = None
-    quantidade_resultado: Decimal | None = None
-    quantidade_ufca: Decimal | None = None
-    valor_total_resultado: Decimal | None = None
-    valor_unitario_estimado: Decimal | None = None
-    valor_unitario_resultado: Decimal | None = None
-    valor_planejamento: Decimal | None = None
-    valor_total_homologado: Decimal | None = None
-    nome_fornecedor: str | None = None
-    numero_item_compra: int | None = None
-    cnpj_fornecedor: str | None = None
-    codigo_fornecedor: str | None = None
-    ni_fornecedor: str | None = None
-    objeto_resumido: str | None = None
-    objeto_TR: str | None = None
-    demandante: str | None = None
-    situacao_compra_item_nome: str | None = None
-    nome_material_ou_servico: str | None = None
-    ano_compra: int | None = None
-    valor_estimado: Decimal | None = None
-
-    valor_homologado: Decimal | None = None
-    descricao_detalhada: str | None = None
+    processo: Optional[str] = None
+    modalidade_nome: Optional[str] = None
+    numero_compra: Optional[str] = None
+    objeto_compra: Optional[str] = None
+    descricao_resumida: Optional[str] = None
+    unidade_medida: Optional[str] = None
+    quantidade_resultado: Optional[Decimal] = None
+    quantidade_ufca: Optional[Decimal] = None
+    valor_total_resultado: Optional[Decimal] = None
+    valor_unitario_estimado: Optional[Decimal] = None
+    valor_unitario_resultado: Optional[Decimal] = None
+    valor_planejamento: Optional[Decimal] = None
+    valor_total_homologado: Optional[Decimal] = None
+    nome_fornecedor: Optional[str] = None
+    numero_item_compra: Optional[int] = None
+    cnpj_fornecedor: Optional[str] = None
+    codigo_fornecedor: Optional[str] = None
+    ni_fornecedor: Optional[str] = None
+    objeto_resumido: Optional[str] = None
+    objeto_TR: Optional[str] = None
+    demandante: Optional[str] = None
+    situacao_compra_item_nome: Optional[str] = None
+    nome_material_ou_servico: Optional[str] = None
+    ano_compra: Optional[int] = None
+    valor_estimado: Optional[Decimal] = None
+    valor_homologado: Optional[Decimal] = None
+    descricao_detalhada: Optional[str] = None
 
     class Config:
         from_attributes = True
 
+class MinhaViewUpdate(BaseModel):
+    processo: Optional[str] = None
+    modalidade_nome: Optional[str] = None
+    numero_compra: Optional[str] = None
+    objeto_compra: Optional[str] = None
+    descricao_resumida: Optional[str] = None
+    unidade_medida: Optional[str] = None
+    quantidade_resultado: Optional[Decimal] = None
+    quantidade_ufca: Optional[Decimal] = None
+    valor_total_resultado: Optional[Decimal] = None
+    valor_unitario_estimado: Optional[Decimal] = None
+    valor_unitario_resultado: Optional[Decimal] = None
+    valor_planejamento: Optional[Decimal] = None
+    valor_total_homologado: Optional[Decimal] = None
+    nome_fornecedor: Optional[str] = None
+    numero_item_compra: Optional[int] = None
+    cnpj_fornecedor: Optional[str] = None
+    codigo_fornecedor: Optional[str] = None
+    ni_fornecedor: Optional[str] = None
+    objeto_resumido: Optional[str] = None
+    objeto_TR: Optional[str] = None
+    demandante: Optional[str] = None
+    situacao_compra_item_nome: Optional[str] = None
+    nome_material_ou_servico: Optional[str] = None
+    ano_compra: Optional[int] = None
+    valor_estimado: Optional[Decimal] = None
+    valor_homologado: Optional[Decimal] = None
+    descricao_detalhada: Optional[str] = None
+
+    class Config:
+        from_attributes = True
